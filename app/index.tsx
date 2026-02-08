@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, Image, Keyboard, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming, } from 'react-native-reanimated';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from './context/ThemeContext';
 
@@ -80,6 +81,8 @@ type ToDoType ={
     const [dateObj, setDateObj] = useState(new Date());
     const [showPicker, setShowPicker] = useState(false);
     
+  const menuTranslateX = useSharedValue(-260);
+
   const swipeGesture = Gesture.Pan()
     .activeOffsetX([-10, 10])  
     .failOffsetY([-5, 5])      
@@ -194,173 +197,191 @@ type ToDoType ={
     later: laterTodos, 
   } = groupTodoByDate(sortedTodos);
 
+    useEffect(() => {
+    menuTranslateX.value = withTiming(
+      isMenuOpen ? 0 : -260,
+      { duration: 250 }
+    );
+  }, [isMenuOpen]);
+
+  const animatedMenuStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: menuTranslateX.value }],
+  }));
+
   return (
     <GestureDetector gesture={swipeGesture}>
-    <SafeAreaView style={styles.container}>
-      <View style={{ flex: 1}}>
-        <ScrollView contentContainerStyle={{paddingBottom: 20}}
-        showsVerticalScrollIndicator={false}
-        >
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => setIsMenuOpen(true)}>
-          <Ionicons name='menu' size={24} color={'#333'} />
-        </TouchableOpacity>
-        <TouchableOpacity>
-        <Image source={{uri: 'https://images.unsplash.com/photo-1769364323382-e2de114ab151?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}} 
-        style={{width: 40, height: 40, borderRadius: 20}} 
-        />
-        </TouchableOpacity>
-      </View>
 
-      <View style={styles.searchBar}>
-        <Ionicons name='search' size={24} color={'#333'} />
-        <TextInput 
-        placeholder='Search'
-        value={searchQery}
-        onChangeText={(text) => setSearchQuery(text)}
-        style={styles.searchInput} 
-        />
-        {searchQery.length > 0 && (
-          <TouchableOpacity
-          onPress={() => setSearchQuery('')}
-          style={styles.clearButton}>
-            <Ionicons name="close-circle" size={20} color={'gray'}/>
-          </TouchableOpacity>
-        )}
-      </View>
-
-        {todayTodos.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Today</Text>
-
-            <FlatList
-              data={todayTodos}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <ToDoItem
-                  todo={item}
-                  deleteTodo={deleteTodo}
-                  handleTodo={handleDone}
-                  styles={styles}
-                />
-              )}
-              scrollEnabled={false}
-            />
-          </View>
-        )}
-        {tomorrowTodos.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tomorrow</Text>  
-            <FlatList
-              data={tomorrowTodos}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <ToDoItem
-                  todo={item}
-                  deleteTodo={deleteTodo}
-                  handleTodo={handleDone}
-                  styles={styles}
-                />
-              )}
-              scrollEnabled={false}
-            />
-          </View>
-        )}
-
-        {laterTodos.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Later</Text>
-
-            <FlatList
-              data={laterTodos}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <ToDoItem
-                  todo={item}
-                  deleteTodo={deleteTodo}
-                  handleTodo={handleDone}
-                  styles={styles}
-                />
-              )}
-              scrollEnabled={false}
-            />
-          </View>
-        )}
-        </ScrollView>
-      </View>
-
-
-        <View style={styles.dateSelector}>
-        <TouchableOpacity style={styles.datePickerButton}
-        onPress={() => setShowPicker(true)}
-        >
-          <Ionicons name='calendar-outline' size={24} color={theme === 'dark' ? '#FFF' : '#111'}/>
-          <Text style={styles.datePickerText}>{selectedDate}</Text>
-        </TouchableOpacity>
-        {showPicker && (<DateTimePicker
-        value={dateObj}
-        mode="date"
-        display="calendar"
-        onChange={(event, selected) => {
-          setShowPicker(false);
-
-          if (selected) {
-            setDateObj(selected);
-            setSelectedDate(selected.toISOString().split('T')[0]);
-          }
-        }}
-        />
-        )}
-      </View>
-
-      <KeyboardAvoidingView style={styles.footer} behavior='padding' keyboardVerticalOffset={10}>
-        <TextInput 
-        placeholder='Add New ToDo'
-        value={todoText} 
-        onChangeText={(text)=> setTodoText(text)} 
-        style={styles.newTodoInput}
-        autoCorrect={false}
-        />
-        
-      <TouchableOpacity
-          style={[styles.addButton,!todoText.trim() && { opacity: 0.5 },]}
-          onPress={addTodo}
-          disabled={!todoText.trim()}
+      <SafeAreaView style={styles.container}>
+        <View style={{ flex: 1}}>
+          <ScrollView contentContainerStyle={{paddingBottom: 20}}
+          showsVerticalScrollIndicator={false}
           >
-          <Ionicons name="add" size={34} color="#fff" />
-      </TouchableOpacity>
-      </KeyboardAvoidingView>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => setIsMenuOpen(true)}>
+            <Ionicons name='menu' size={24} color={'#333'} />
+          </TouchableOpacity>
+          <TouchableOpacity>
+          <Image source={{uri: 'https://images.unsplash.com/photo-1769364323382-e2de114ab151?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}} 
+          style={{width: 40, height: 40, borderRadius: 20}} 
+          />
+          </TouchableOpacity>
+        </View>
 
-      {isMenuOpen && (
-        <View style={styles.sidePanel}>
-            <TouchableOpacity onPress={() => setIsMenuOpen(false)}>
-              <Ionicons name='menu' size={24} color={'#333'} />
+        <View style={styles.searchBar}>
+          <Ionicons name='search' size={24} color={'#333'} />
+          <TextInput 
+          placeholder='Search'
+          value={searchQery}
+          onChangeText={(text) => setSearchQuery(text)}
+          style={styles.searchInput} 
+          />
+          {searchQery.length > 0 && (
+            <TouchableOpacity
+            onPress={() => setSearchQuery('')}
+            style={styles.clearButton}>
+              <Ionicons name="close-circle" size={20} color={'gray'}/>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.menuItem} 
+          )}
+        </View>
+
+          {todayTodos.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Today</Text>
+
+              <FlatList
+                data={todayTodos}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <ToDoItem
+                    todo={item}
+                    deleteTodo={deleteTodo}
+                    handleTodo={handleDone}
+                    styles={styles}
+                  />
+                )}
+                scrollEnabled={false}
+              />
+            </View>
+          )}
+          {tomorrowTodos.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Tomorrow</Text>  
+              <FlatList
+                data={tomorrowTodos}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <ToDoItem
+                    todo={item}
+                    deleteTodo={deleteTodo}
+                    handleTodo={handleDone}
+                    styles={styles}
+                  />
+                )}
+                scrollEnabled={false}
+              />
+            </View>
+          )}
+
+          {laterTodos.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Later</Text>
+
+              <FlatList
+                data={laterTodos}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <ToDoItem
+                    todo={item}
+                    deleteTodo={deleteTodo}
+                    handleTodo={handleDone}
+                    styles={styles}
+                  />
+                )}
+                scrollEnabled={false}
+              />
+            </View>
+          )}
+          </ScrollView>
+        </View>
+
+
+          <View style={styles.dateSelector}>
+          <TouchableOpacity style={styles.datePickerButton}
+          onPress={() => setShowPicker(true)}
+          >
+            <Ionicons name='calendar-outline' size={24} color={theme === 'dark' ? '#FFF' : '#111'}/>
+            <Text style={styles.datePickerText}>{selectedDate}</Text>
+          </TouchableOpacity>
+          {showPicker && (<DateTimePicker
+          value={dateObj}
+          mode="date"
+          display="calendar"
+          onChange={(event, selected) => {
+            setShowPicker(false);
+
+            if (selected) {
+              setDateObj(selected);
+              setSelectedDate(selected.toISOString().split('T')[0]);
+            }
+          }}
+          />
+          )}
+        </View>
+
+        <KeyboardAvoidingView style={styles.footer} behavior='padding' keyboardVerticalOffset={10}>
+          <TextInput 
+          placeholder='Add New ToDo'
+          value={todoText} 
+          onChangeText={(text)=> setTodoText(text)} 
+          style={styles.newTodoInput}
+          autoCorrect={false}
+          />
+          
+        <TouchableOpacity
+            style={[styles.addButton,!todoText.trim() && { opacity: 0.5 },]}
+            onPress={addTodo}
+            disabled={!todoText.trim()}
+            >
+            <Ionicons name="add" size={34} color="#fff" />
+        </TouchableOpacity>
+        </KeyboardAvoidingView>
+        
+      {isMenuOpen && (
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setIsMenuOpen(false)}
+          style={styles.backdrop}
+        />
+      )}
+          <Animated.View style={[styles.sidePanel, animatedMenuStyle]}>
+            <TouchableOpacity onPress={() => setIsMenuOpen(false)}>
+              <Ionicons name="close" size={24} color={theme === 'dark' ? '#FFF' : '#111'} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
               onPress={() => {
                 setIsMenuOpen(false);
                 router.push('/SettingsScreen');
-              }}>
-              <Ionicons name='settings-outline'size={24} color={theme === 'dark' ? '#FFF' : '#111'}/> 
+              }}
+            >
+              <Ionicons name="settings-outline" size={24} />
               <Text style={styles.menuText}>Settings</Text>
             </TouchableOpacity>
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
-              <TouchableOpacity 
-              style={styles.menuItem} 
+
+            <TouchableOpacity
+              style={styles.menuItem}
               onPress={() => {
                 setIsMenuOpen(false);
                 router.push('/CalendarScreen');
-              }}>
-              <Ionicons name='calendar-number-outline' size={24} color={theme === 'dark' ? '#FFF' : '#111'}/> 
+              }}
+            >
+              <Ionicons name="calendar-number-outline" size={24} />
               <Text style={styles.menuText}>Calendar</Text>
             </TouchableOpacity>
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}></View>
-            </View>
-        </View>
-      )}  
-    </SafeAreaView>
-    </GestureDetector>   
+          </Animated.View>
+        </SafeAreaView> 
+      </GestureDetector>
   );
 }
 
@@ -476,6 +497,7 @@ const getStyles = (theme: 'light' | 'dark') =>
       backgroundColor: theme === 'dark' ? '#1E1E1E' : '#FFFFFF',
       elevation: 6,
       borderRadius: 10,
+      zIndex: 10,
     },
 
     menuItem: {
@@ -559,5 +581,14 @@ const getStyles = (theme: 'light' | 'dark') =>
       fontSize: 11,
       fontWeight: '600',
       color: '#1E3A8A',
+    },
+    backdrop: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.3)',
+      zIndex: 10,
     },
   });

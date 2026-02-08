@@ -2,7 +2,6 @@ import useTripleTap from "@/hooks/useTripleTap";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StyleSheet, Switch, Text, TouchableOpacity, View, } from "react-native";
-import { GestureDetector } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from './context/ThemeContext';
 
@@ -13,8 +12,6 @@ export default function SettingsScreen() {
     const styles = getStyles(theme);
 
   return (
-    <GestureDetector gesture={tripleTapGesture}>
-
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.replace('/')}>
@@ -54,7 +51,6 @@ export default function SettingsScreen() {
         
 
       </SafeAreaView>
-    </GestureDetector>
   );
 }
 
