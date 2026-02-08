@@ -1,4 +1,3 @@
-import useTripleTap from "@/hooks/useTripleTap";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Checkbox from "expo-checkbox";
@@ -6,7 +5,6 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { LayoutAnimation, Platform, StyleSheet, Text, TouchableOpacity, UIManager, View } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { GestureDetector } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "./context/ThemeContext";
 
@@ -26,7 +24,7 @@ type ToDoType = {
 }
 
 export default function CalendarScreen() {
-    const tripleTapGesture = useTripleTap();
+    /*const tripleTapGesture = useTripleTap();*/
     const router = useRouter();
     const {theme, toggleTheme, colors} = useTheme();
     const styles = getStyles(theme);
@@ -74,8 +72,6 @@ export default function CalendarScreen() {
     };
 
     return(
-
-        <GestureDetector gesture={tripleTapGesture}>
 
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
@@ -132,7 +128,6 @@ export default function CalendarScreen() {
                 </View>
 
             </SafeAreaView>
-        </GestureDetector>
     )
 }
 const getStyles = (theme: 'light' | 'dark') => 
