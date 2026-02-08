@@ -345,7 +345,7 @@ type ToDoType ={
             <Ionicons name="add" size={34} color="#fff" />
         </TouchableOpacity>
         </KeyboardAvoidingView>
-        
+
       {isMenuOpen && (
         <TouchableOpacity
           activeOpacity={1}
@@ -365,7 +365,7 @@ type ToDoType ={
                 router.push('/SettingsScreen');
               }}
             >
-              <Ionicons name="settings-outline" size={24} />
+              <Ionicons name="settings-outline" size={24} color={theme === 'dark' ? '#FFF' : '#111'} />
               <Text style={styles.menuText}>Settings</Text>
             </TouchableOpacity>
 
@@ -376,7 +376,7 @@ type ToDoType ={
                 router.push('/CalendarScreen');
               }}
             >
-              <Ionicons name="calendar-number-outline" size={24} />
+              <Ionicons name="calendar-number-outline" size={24} color={theme === 'dark' ? '#FFF' : '#111'} />
               <Text style={styles.menuText}>Calendar</Text>
             </TouchableOpacity>
           </Animated.View>
